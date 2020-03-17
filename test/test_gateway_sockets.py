@@ -17,7 +17,7 @@ from syft.serde.msgpack import serde
 
 from uuid import UUID
 
-from test import GATEWAY_WS_URL
+from . import GATEWAY_WS_URL
 
 hook = sy.TorchHook(th)
 

@@ -443,11 +443,15 @@ def fl_cycle_application_decision():
 
     # parse query strings (for now), evetually this will be parsed from the request body
     model_id = request.args.get("model_id")
-    up_speed = request.args.get("up_speed")
-    down_speed = request.args.get("down_speed")
-    worker_id = request.args.get("worker_id")
+    up_speed = request.args.get("up_speed") or 9999
+    down_speed = request.args.get("down_speed") or 9999
+    worker_id = request.args.get("worker_id") or 0
     worker_ping = request.args.get("ping")
-    _cycle = processes.get_cycle(model_id)
+    _cycle = (
+        processes.get_cycle(model_id)
+        if model_id
+        else {"cycle_sequence": 1, "cycle_time": 999999}
+    )
     _accept = False
     """
     MVP variable stubs:
@@ -485,8 +489,8 @@ def fl_cycle_application_decision():
             )  # this should reuturn current cycle sequence number
         )
         * (_cycle.get("cycle_sequence", 99999) <= _server_config["num_cycles"])
-        * (_cycle.cycle_time > MINIMUM_CYCLE_TIME_LEFT)
-        * (worker_id not in _cycle._workers)
+        * (_cycle.get("cycle_time", 0) > MINIMUM_CYCLE_TIME_LEFT)
+        * (worker_id not in _cycle.get("_workers", []))
     )
 
     if up_speed_check * down_speed_check * cycle_valid_check:
@@ -595,7 +599,7 @@ def fl_cycle_application_decision():
                 WARN = "_bisect_approximator failed unexpectedly, reset rej_prob to default"
                 logging.exception(WARN)  # log error
 
-            if random.random_sample() < rej_prob:
+            if np.random.random_sample() < rej_prob:
                 _accept = True
 
     if _accept:

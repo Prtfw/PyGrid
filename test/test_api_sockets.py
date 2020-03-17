@@ -8,8 +8,8 @@ import torch as th
 import torch.nn.functional as F
 import numpy as np
 
-from test import PORTS, IDS, worker_ports
-from test import conftest
+from . import PORTS, IDS, worker_ports
+from . import conftest
 
 
 hook = sy.TorchHook(th)
